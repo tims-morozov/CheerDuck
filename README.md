@@ -13,6 +13,8 @@ CheerDuck — уютное мини-приложение в Telegram для св
 ### 🇬🇧 English
 CheerDuck is a cozy Telegram mini-app for swaps. Here you can connect things and objects with other people. You give away what you no longer need and get what you want. No money, complicated campaigns, or unnecessary apps. Everything is inside Telegram. CheerDuck helps you declutter your space, find what you need, and transform yourself with passion.
 
+> 🤖 Проект разработан с помощью ИИ-ассистента. / Built with the help of an AI assistant.
+
 ---
 
 ## 🛠 Стек технологий / Tech stack
