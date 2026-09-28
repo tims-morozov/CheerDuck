@@ -1,0 +1,40 @@
+# --- Python (backend) ---
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.db
+*.sqlite
+*.sqlite3
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- Секреты / окружение (Secrets / environment) ---
+.env
+.env.*
+!.env.example
+
+# --- Node / Frontend ---
+node_modules/
+dist/
+dist-ssr/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# --- Внутренние файлы (не публикуются / Internal files, not published) ---
+PROJECT_STATUS.md
+.cursorrules
+
+# --- Редакторы / ОС (Editors / OS) ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log

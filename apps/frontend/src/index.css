@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+/* Шрифты CheerDuck (self-hosted через @fontsource — без внешних CDN).
+   Подключаем только реально нужные наборы символов: кириллица + латиница.
+   - Montserrat Medium (500) — заголовки H1/H2/H3
+   - Roboto 400/500/700 — основной текст, подписи и кнопки */
+@import "@fontsource/montserrat/cyrillic-500.css";
+@import "@fontsource/montserrat/latin-500.css";
+@import "@fontsource/roboto/cyrillic-400.css";
+@import "@fontsource/roboto/latin-400.css";
+@import "@fontsource/roboto/cyrillic-500.css";
+@import "@fontsource/roboto/latin-500.css";
+@import "@fontsource/roboto/cyrillic-700.css";
+@import "@fontsource/roboto/latin-700.css";
+
+/* Дизайн-система типографики: семейства шрифтов и шкала H1 / H2 / H3 / P */
+@theme {
+  --font-sans: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  --font-heading: 'Montserrat', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+
+  /* H1 — Montserrat Medium 24px, H2 — 24px, H3 — 20px */
+  --text-h1: 24px;
+  --text-h1--line-height: 1.2;
+  --text-h2: 24px;
+  --text-h2--line-height: 1.25;
+  --text-h3: 20px;
+  --text-h3--line-height: 1.35;
+
+  /* P — Roboto Regular 17px */
+  --text-p: 17px;
+  --text-p--line-height: 1.45;
+}
+
+:root {
+  --bg-primary: #000000;
+  --bg-secondary: #0d0d0d;
+  --bg-card: #141414;
+  --bg-input: #1a1a1a;
+  --border-color: #262626;
+  --text-primary: #ffffff;
+  --text-secondary: #8e8e93;
+  --accent-lime: #cfff76;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-p);
+  font-weight: 400;
+  line-height: var(--text-p--line-height);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 100vh;
+}
+
+/* Базовые стили типографики: заголовки — Montserrat Medium по шкале H1/H2/H3,
+   абзацы — Roboto Regular 17px. Утилиты Tailwind (text-xs, text-sm и т.д.)
+   могут точечно переопределить размер для компактных подписей и карточек. */
+@layer base {
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-heading);
+    font-weight: 500;
+  }
+
+  h1 {
+    font-size: var(--text-h1);
+    line-height: var(--text-h1--line-height);
+  }
+
+  h2 {
+    font-size: var(--text-h2);
+    line-height: var(--text-h2--line-height);
+  }
+
+  h3 {
+    font-size: var(--text-h3);
+    line-height: var(--text-h3--line-height);
+  }
+
+  p {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: var(--text-p);
+    line-height: var(--text-p--line-height);
+  }
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-primary);
+}

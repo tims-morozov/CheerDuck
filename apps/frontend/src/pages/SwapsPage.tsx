@@ -1,0 +1,97 @@
+import React, { useEffect, useState } from 'react';
+import type { SwapOffer } from '../types';
+import { api } from '../api/client';
+import { useTelegram } from '../hooks/useTelegram';
+import { ArrowRightLeft } from 'lucide-react';
+import { SwapCard } from '../components/SwapCard';
+
+export const SwapsPage: React.FC = () => {
+  const { haptic } = useTelegram();
+  const [tab, setTab] = useState<'incoming' | 'outgoing'>('incoming');
+  const [offers, setOffers] = useState<SwapOffer[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadOffers = async () => {
+    setLoading(true);
+    try {
+      const data = await api.getMySwaps(tab);
+      setOffers(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadOffers();
+  }, [tab]);
+
+  const handleRespond = async (offerId: number, accept: boolean) => {
+    haptic.impact(accept ? 'heavy' : 'light');
+    try {
+      await api.respondToSwap(offerId, accept);
+      loadOffers();
+    } catch (e: any) {
+      alert(e.message || 'Ошибка обработки');
+    }
+  };
+
+  return (
+    <div className="pb-28 pt-3 px-4 max-w-md mx-auto w-full text-left bg-black text-white">
+      <h1 className="mb-3 text-white">Предложения обмена</h1>
+
+      <div className="flex bg-[#141414] border border-[#262626] p-1 rounded-xl mb-4">
+        <button
+          onClick={() => setTab('incoming')}
+          className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
+            tab === 'incoming'
+              ? 'bg-[#CFFF76] text-black shadow-sm'
+              : 'text-[#8E8E93] hover:text-white'
+          }`}
+        >
+          Входящие
+        </button>
+        <button
+          onClick={() => setTab('outgoing')}
+          className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
+            tab === 'outgoing'
+              ? 'bg-[#CFFF76] text-black shadow-sm'
+              : 'text-[#8E8E93] hover:text-white'
+          }`}
+        >
+          Исходящие
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="space-y-3">
+          {[1, 2].map((n) => (
+            <div key={n} className="h-32 bg-[#141414] border border-[#262626] rounded-2xl animate-pulse" />
+          ))}
+        </div>
+      ) : offers.length === 0 ? (
+        <div className="text-center py-16">
+          <ArrowRightLeft className="w-8 h-8 mx-auto text-zinc-600 mb-2 opacity-50" />
+          <h3 className="text-white">Нет предложений</h3>
+          <p className="text-[#8E8E93] mt-0.5">
+            {tab === 'incoming' ? 'Пока никто не предложил обмен' : 'Вы еще не отправляли предложений'}
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {offers.map((offer) => (
+            <SwapCard
+              key={offer.id}
+              offer={offer}
+              isIncoming={tab === 'incoming'}
+              onRespond={handleRespond}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+
