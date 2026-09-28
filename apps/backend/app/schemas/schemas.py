@@ -67,3 +67,7 @@ class SwapOut(BaseModel):
     # Контакт в Telegram показывается ТОЛЬКО если статус accepted
     contact_username: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
+
+# Загрузка файлов (фото предметов)
+class UploadOut(BaseModel):
+    urls: List[str]

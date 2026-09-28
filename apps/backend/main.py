@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.core.database import engine, Base
 from app.api.endpoints import api_router
@@ -27,6 +29,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Папка для загруженных фото должна существовать уже на момент монтирования StaticFiles
+Path(settings.UPLOAD_DIR).mkdir(parents=True, exist_ok=True)
+
+# Раздача загруженных пользователями фото: /uploads/<filename>
+app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
 
 # Подключение роутов
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)

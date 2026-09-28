@@ -1,12 +1,13 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, File, Query, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.core.security import get_current_user, TelegramUser
-from app.schemas.schemas import UserOut, UserUpdateCity, ItemOut, ItemCreate, SwapOut, SwapCreate
+from app.schemas.schemas import UserOut, UserUpdateCity, ItemOut, ItemCreate, SwapOut, SwapCreate, UploadOut
 from app.services.user_service import UserService
 from app.services.item_service import ItemService
 from app.services.swap_service import SwapService
+from app.services.upload_service import UploadService
 from app.models.swap import SwapStatus
 
 api_router = APIRouter()
@@ -67,6 +68,20 @@ async def create_item(
     # Убедимся, что пользователь есть в БД
     await UserService.get_or_create(db, current_user)
     return await ItemService.create_item(db, current_user.id, data)
+
+# --- Загрузка файлов (фото предметов) ---
+@api_router.post("/uploads", response_model=UploadOut)
+async def upload_images(
+    files: List[UploadFile] = File(...),
+    current_user: TelegramUser = Depends(get_current_user),
+):
+    """
+    Загрузка фото предмета (от 1 до settings.MAX_IMAGES файлов за раз).
+    В ответе — относительные URL, которые затем передаются в поле images
+    при создании предмета.
+    """
+    urls = await UploadService.save_images(files)
+    return UploadOut(urls=urls)
 
 # --- Свопы (Swap Offers) ---
 @api_router.post("/swaps", response_model=SwapOut)

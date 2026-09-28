@@ -2,6 +2,10 @@ import { Item, SwapOffer, User } from '../types';
 
 const API_BASE = '/api/v1';
 
+interface UploadResponse {
+  urls: string[];
+}
+
 // Получаем строку initData от Telegram WebApp (если запущено внутри Telegram)
 function getTelegramInitData(): string {
   if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp?.initData) {
@@ -57,6 +61,33 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
+
+  // Загрузка фото предмета (до 5 файлов за раз) — возвращает относительные URL
+  uploadImages: async (files: File[]): Promise<string[]> => {
+    const initData = getTelegramInitData();
+    const headers: Record<string, string> = {};
+    if (initData) {
+      headers['Authorization'] = `tma ${initData}`;
+    }
+
+    const formData = new FormData();
+    files.forEach((file) => formData.append('files', file));
+
+    // Content-Type НЕ задаём вручную: браузер сам добавит multipart/form-data с boundary
+    const response = await fetch(`${API_BASE}/uploads`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || `Ошибка загрузки фото (${response.status})`);
+    }
+
+    const data: UploadResponse = await response.json();
+    return data.urls;
+  },
 
   // Обмены
   getMySwaps: (type: 'incoming' | 'outgoing') =>

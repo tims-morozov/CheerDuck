@@ -13,6 +13,20 @@ class Settings(BaseSettings):
     
     # Разрешенные источники для CORS (фронтенд)
     CORS_ORIGINS: list[str] = ["*"]
+
+    # Загрузка фото предметов: файлы лежат на диске и раздаются через /uploads
+    UPLOAD_DIR: str = "uploads"
+    # Максимальный размер одного файла — 10 МБ
+    MAX_UPLOAD_SIZE: int = 10 * 1024 * 1024
+    # Максимум фото на один предмет (минимум — 1, проверяется при публикации)
+    MAX_IMAGES: int = 5
+    # Разрешенные форматы фото: MIME-тип -> расширение сохраняемого файла
+    ALLOWED_IMAGE_TYPES: dict[str, str] = {
+        "image/jpeg": ".jpg",
+        "image/png": ".png",
+        "image/webp": ".webp",
+        "image/gif": ".gif",
+    }
     
     # Режим отладки (True пропускает валидацию Telegram initData для локального тестирования в браузере)
     DEBUG_MODE: bool = True
