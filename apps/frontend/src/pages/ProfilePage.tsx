@@ -15,6 +15,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onShowRules, onSelectI
   const [user, setUser] = useState<User | null>(null);
   const [myItems, setMyItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
+  // Переключатель списка лотов: активные (в обмене) / завершённые (архив).
+  const [tab, setTab] = useState<'active' | 'completed'>('active');
 
   useEffect(() => {
     Promise.all([api.getMe(), api.getMyItems()])
@@ -24,6 +26,12 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onShowRules, onSelectI
       })
       .finally(() => setLoading(false));
   }, []);
+
+  // Активные лоты — те, что участвуют в обмене; завершённые — ушедшие в архив
+  // после принятого свопа (status = 'swapped').
+  const activeItems = myItems.filter((item) => item.status === 'active');
+  const completedItems = myItems.filter((item) => item.status === 'swapped');
+  const visibleItems = tab === 'active' ? activeItems : completedItems;
 
   return (
     <div className="pb-28 pt-3 px-4 max-w-md mx-auto w-full text-left bg-black text-white">
@@ -65,11 +73,34 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onShowRules, onSelectI
         </a>
       </div>
 
-      {/* Мои выложенные предметы */}
+      {/* Мои лоты: заголовок и переключатель «Активные / Завершенные», как в разделе «Свопы» */}
       <div>
         <p className="text-xs font-bold text-[#8E8E93] mb-2.5">
-          Мои лоты ({myItems.length})
+          Мои лоты ({visibleItems.length})
         </p>
+
+        <div className="flex bg-[#141414] border border-[#262626] p-1 rounded-xl mb-4">
+          <button
+            onClick={() => setTab('active')}
+            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
+              tab === 'active'
+                ? 'bg-[#CFFF76] text-black shadow-sm'
+                : 'text-[#8E8E93] hover:text-white'
+            }`}
+          >
+            Активные
+          </button>
+          <button
+            onClick={() => setTab('completed')}
+            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
+              tab === 'completed'
+                ? 'bg-[#CFFF76] text-black shadow-sm'
+                : 'text-[#8E8E93] hover:text-white'
+            }`}
+          >
+            Завершенные
+          </button>
+        </div>
 
         {loading ? (
           <div className="grid grid-cols-2 gap-3">
@@ -80,18 +111,23 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onShowRules, onSelectI
               />
             ))}
           </div>
-        ) : myItems.length === 0 ? (
+        ) : visibleItems.length === 0 ? (
           <div className="p-8 text-center bg-[#141414] rounded-2xl border border-[#262626]">
-            <p className="text-[#8E8E93]">Вы пока не выставили ни одной вещи</p>
+            <p className="text-[#8E8E93]">
+              {tab === 'active'
+                ? 'Вы пока не добавили предметы'
+                : 'У вас пока нет завершенных обменов'}
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
-            {myItems.map((item) => (
+            {visibleItems.map((item) => (
               <ItemCard
                 key={item.id}
                 item={item}
                 onClick={() => onSelectItem(item)}
-                onEdit={() => onEditItem(item)}
+                // Редактировать можно только активные лоты: архивные уже не в обмене
+                onEdit={item.status === 'active' ? () => onEditItem(item) : undefined}
               />
             ))}
           </div>

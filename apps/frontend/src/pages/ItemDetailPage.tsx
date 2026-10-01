@@ -41,6 +41,9 @@ export const ItemDetailPage: React.FC<ItemDetailPageProps> = ({
   const [deleting, setDeleting] = useState(false);
   const [accepting, setAccepting] = useState(false);
   const isMyItem = currentUserId === item.user_id;
+  // Лот участвует в обмене, только пока он активен: после принятого свопа он
+  // уходит в архив (status = 'swapped') и предлагать по нему обмен нельзя.
+  const isItemAvailable = item.status === 'active';
   const conditionLabel = CONDITION_LABELS[item.condition] ?? `${item.condition} состояние`;
 
   // Принять оффер можно прямо в карточке, если открыт именно предлагаемый
@@ -178,7 +181,7 @@ export const ItemDetailPage: React.FC<ItemDetailPageProps> = ({
             >
               {accepting ? 'Принимаем…' : 'Принять своп'}
             </button>
-          ) : (
+          ) : isItemAvailable ? (
             <button
               onClick={() => {
                 haptic.impact('medium');
@@ -188,6 +191,11 @@ export const ItemDetailPage: React.FC<ItemDetailPageProps> = ({
             >
               Предложить своп
             </button>
+          ) : (
+            // Лот в архиве (обмен уже состоялся) — предлагать обмен нельзя
+            <div className="w-full py-3.5 bg-[#141414] border border-[#262626] rounded-xl text-[#8E8E93] font-semibold text-sm flex items-center justify-center">
+              Предмет больше не участвует в обмене
+            </div>
           )}
         </div>
       </div>

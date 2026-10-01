@@ -1,5 +1,5 @@
 from typing import List
-from sqlalchemy import select, desc
+from sqlalchemy import select, desc, update, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from fastapi import HTTPException
@@ -18,6 +18,10 @@ class SwapService:
         offered = offered_res.scalar_one_or_none()
         if not offered or offered.user_id != sender_id:
             raise HTTPException(status_code=400, detail="Предлагаемый предмет не принадлежит вам")
+        # Предлагать можно только активные вещи: после принятого свопа лот уходит
+        # в архив (ItemStatus.SWAPPED) и участвовать в новых обменах уже не должен.
+        if offered.status != ItemStatus.ACTIVE:
+            raise HTTPException(status_code=400, detail="Этот предмет больше не участвует в обмене")
 
         # Проверяем целевой предмет
         target_res = await session.execute(select(Item).where(Item.id == data.target_item_id))
@@ -26,6 +30,10 @@ class SwapService:
             raise HTTPException(status_code=404, detail="Целевой предмет не найден")
         if target.user_id == sender_id:
             raise HTTPException(status_code=400, detail="Нельзя меняться с самим собой")
+        # Целевой лот тоже должен быть активным (лента отдаёт только active,
+        # но оффер можно создать и прямым запросом к API).
+        if target.status != ItemStatus.ACTIVE:
+            raise HTTPException(status_code=400, detail="Этот предмет больше недоступен для обмена")
 
         offer = SwapOffer(
             sender_id=sender_id,
@@ -105,11 +113,29 @@ class SwapService:
 
         if accept:
             offer.status = SwapStatus.ACCEPTED
-            # Помечаем вещи как "в сделке"
+            # Сделка состоялась — обе вещи уходят в архив (ItemStatus.SWAPPED):
+            # лента отдаёт только активные лоты, поэтому архивированные пропадают
+            # из неё, а create_offer больше не даст предложить по ним обмен.
             if offer.offered_item:
-                offer.offered_item.status = ItemStatus.IN_DEAL
+                offer.offered_item.status = ItemStatus.SWAPPED
             if offer.target_item:
-                offer.target_item.status = ItemStatus.IN_DEAL
+                offer.target_item.status = ItemStatus.SWAPPED
+
+            # Закрываем конкурирующие ожидающие офферы на те же вещи: раз предметы
+            # ушли в архив, завершить по ним другую сделку уже нельзя.
+            item_ids = [offer.offered_item_id, offer.target_item_id]
+            await session.execute(
+                update(SwapOffer)
+                .where(
+                    SwapOffer.id != offer.id,
+                    SwapOffer.status == SwapStatus.PENDING,
+                    or_(
+                        SwapOffer.offered_item_id.in_(item_ids),
+                        SwapOffer.target_item_id.in_(item_ids),
+                    ),
+                )
+                .values(status=SwapStatus.REJECTED)
+            )
         else:
             offer.status = SwapStatus.REJECTED
 
