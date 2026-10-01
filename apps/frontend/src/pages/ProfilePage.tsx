@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Item, User } from '../types';
 import { api } from '../api/client';
 import { CheerDuckLogo } from '../components/CheerDuckLogo';
-import { ShieldCheck, HelpCircle, Pencil } from 'lucide-react';
+import { ItemCard } from '../components/ItemCard';
+import { ShieldCheck, HelpCircle } from 'lucide-react';
 
 interface ProfilePageProps {
   onShowRules: () => void;
@@ -71,36 +72,27 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onShowRules, onSelectI
         </p>
 
         {loading ? (
-          <div className="h-20 bg-[#141414] border border-[#262626] rounded-2xl animate-pulse" />
+          <div className="grid grid-cols-2 gap-3">
+            {[1, 2].map((n) => (
+              <div
+                key={n}
+                className="aspect-square bg-[#141414] border border-[#262626] animate-pulse rounded-2xl"
+              />
+            ))}
+          </div>
         ) : myItems.length === 0 ? (
           <div className="p-8 text-center bg-[#141414] rounded-2xl border border-[#262626]">
             <p className="text-[#8E8E93]">Вы пока не выставили ни одной вещи</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="grid grid-cols-2 gap-3">
             {myItems.map((item) => (
-              <div
+              <ItemCard
                 key={item.id}
+                item={item}
                 onClick={() => onSelectItem(item)}
-                className="p-3.5 bg-[#141414] border border-[#262626] hover:border-[#CFFF76]/50 rounded-xl flex items-center justify-between gap-3 cursor-pointer transition-all"
-              >
-                <div className="min-w-0">
-                  <h3 className="text-sm line-clamp-1 text-white">{item.title}</h3>
-                  <span className="text-[10px] text-[#8E8E93]">{item.city}</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    // Не открываем карточку лота — только запускаем редактирование
-                    e.stopPropagation();
-                    onEditItem(item);
-                  }}
-                  aria-label="Редактировать лот"
-                  className="shrink-0 p-2 rounded-lg bg-[#1A1A1A] border border-[#262626] text-[#8E8E93] hover:text-[#CFFF76] hover:border-[#CFFF76]/40 active:scale-95 transition-all"
-                >
-                  <Pencil className="w-3.5 h-3.5" />
-                </button>
-              </div>
+                onEdit={() => onEditItem(item)}
+              />
             ))}
           </div>
         )}
