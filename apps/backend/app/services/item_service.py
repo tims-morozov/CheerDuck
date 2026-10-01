@@ -45,7 +45,59 @@ class ItemService:
         return list(result.scalars().all())
 
     @staticmethod
+    async def _find_duplicate(
+        session: AsyncSession,
+        user_id: int,
+        title: str,
+        description: str,
+        condition: str,
+        city: str,
+        exclude_item_id: Optional[int] = None,
+    ) -> Optional[Item]:
+        """
+        Ищет у пользователя лот с полностью совпадающим содержимым:
+        название + описание + состояние + город.
+
+        Точные поля (состояние, город) фильтруются в SQL. Название и описание
+        сравниваются без учёта регистра и внешних пробелов — нормализация делается
+        в Python, а не через SQL `lower()`: встроенный `lower()` в SQLite работает
+        только с ASCII и не приводит регистр кириллицы, из-за чего дубли по русским
+        названиям/описаниям не находились бы.
+
+        exclude_item_id нужен при редактировании, чтобы лот не «находил» сам себя.
+        Возвращает найденный предмет-дубль или None.
+        """
+        query = select(Item).where(
+            Item.user_id == user_id,
+            Item.condition == condition,
+            Item.city == city,
+        )
+        if exclude_item_id is not None:
+            query = query.where(Item.id != exclude_item_id)
+
+        result = await session.execute(query)
+        candidates = result.scalars().all()
+
+        norm_title = title.strip().lower()
+        norm_description = description.strip().lower()
+        for candidate in candidates:
+            if (
+                candidate.title.strip().lower() == norm_title
+                and candidate.description.strip().lower() == norm_description
+            ):
+                return candidate
+        return None
+
+    @staticmethod
     async def create_item(session: AsyncSession, user_id: int, data: ItemCreate) -> Item:
+        # Запрещаем дубли в профиле: у одного пользователя не должно быть двух
+        # лотов с полностью совпадающим содержимым. Сравнение — в _find_duplicate.
+        duplicate = await ItemService._find_duplicate(
+            session, user_id, data.title, data.description, data.condition, data.city
+        )
+        if duplicate:
+            raise HTTPException(status_code=409, detail="У вас уже есть точно такой же предмет")
+
         item = Item(
             user_id=user_id,
             title=data.title,
@@ -79,7 +131,25 @@ class ItemService:
         if item.user_id != user_id:
             raise HTTPException(status_code=403, detail="Можно редактировать только свои лоты")
 
-        for field, value in data.model_dump(exclude_unset=True).items():
+        changes = data.model_dump(exclude_unset=True)
+
+        # Запрещаем дубли и при редактировании: если меняются поля, влияющие на
+        # «идентичность» лота, проверяем итоговое содержимое (с учётом правок),
+        # исключая сам редактируемый лот.
+        if any(field in changes for field in ("title", "description", "condition", "city")):
+            duplicate = await ItemService._find_duplicate(
+                session,
+                user_id,
+                changes.get("title", item.title),
+                changes.get("description", item.description),
+                changes.get("condition", item.condition),
+                changes.get("city", item.city),
+                exclude_item_id=item_id,
+            )
+            if duplicate:
+                raise HTTPException(status_code=409, detail="У вас уже есть точно такой же предмет")
+
+        for field, value in changes.items():
             setattr(item, field, value)
 
         await session.commit()
