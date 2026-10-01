@@ -35,6 +35,21 @@ class SwapService:
         if target.status != ItemStatus.ACTIVE:
             raise HTTPException(status_code=400, detail="Этот предмет больше недоступен для обмена")
 
+        # Запрет повторных предложений: по одному целевому предмету пользователь
+        # может предложить обмен только один раз — независимо от того, чем
+        # закончился прежний оффер (ожидает ответа, отклонён или принят).
+        # Предложить обмен заново по тому же предмету нельзя.
+        already_offered_res = await session.execute(
+            select(SwapOffer.id)
+            .where(
+                SwapOffer.sender_id == sender_id,
+                SwapOffer.target_item_id == data.target_item_id,
+            )
+            .limit(1)
+        )
+        if already_offered_res.scalar_one_or_none() is not None:
+            raise HTTPException(status_code=400, detail="Вы уже предлагали обмен по этому предмету")
+
         offer = SwapOffer(
             sender_id=sender_id,
             recipient_id=target.user_id,

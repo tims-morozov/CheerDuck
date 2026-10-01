@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Item, SwapOffer } from '../types';
 import { api } from '../api/client';
 import { ConfirmModal } from '../components/ConfirmModal';
@@ -40,11 +40,34 @@ export const ItemDetailPage: React.FC<ItemDetailPageProps> = ({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [accepting, setAccepting] = useState(false);
+  // Отправлял ли я уже предложение обмена по этому предмету. Повторно предлагать
+  // нельзя (бэкенд это тоже проверяет), поэтому вместо кнопки покажем подсказку.
+  const [alreadyOffered, setAlreadyOffered] = useState(false);
   const isMyItem = currentUserId === item.user_id;
   // Лот участвует в обмене, только пока он активен: после принятого свопа он
   // уходит в архив (status = 'swapped') и предлагать по нему обмен нельзя.
   const isItemAvailable = item.status === 'active';
   const conditionLabel = CONDITION_LABELS[item.condition] ?? `${item.condition} состояние`;
+
+  // Узнаём, отправлял ли я уже предложение обмена по этому предмету (среди всех
+  // моих исходящих офферов — любого статуса). Если да, повторно предлагать нельзя.
+  useEffect(() => {
+    if (isMyItem) return;
+    let cancelled = false;
+    api.getMySwaps('outgoing')
+      .then((offers) => {
+        if (!cancelled) {
+          setAlreadyOffered(offers.some((o) => o.target_item_id === item.id));
+        }
+      })
+      .catch(() => {
+        // Список недоступен — возможность отправить оффер оставим: повторный
+        // оффер всё равно отклонит бэкенд.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [item.id, isMyItem]);
 
   // Принять оффер можно прямо в карточке, если открыт именно предлагаемый
   // предмет из ожидающего входящего оффера (и это не мой лот).
@@ -181,7 +204,17 @@ export const ItemDetailPage: React.FC<ItemDetailPageProps> = ({
             >
               {accepting ? 'Принимаем…' : 'Принять своп'}
             </button>
-          ) : isItemAvailable ? (
+          ) : !isItemAvailable ? (
+            // Лот в архиве (обмен уже состоялся) — предлагать обмен нельзя
+            <div className="w-full py-3.5 bg-[#141414] border border-[#262626] rounded-xl text-[#8E8E93] font-semibold text-sm flex items-center justify-center">
+              Предмет больше не участвует в обмене
+            </div>
+          ) : alreadyOffered ? (
+            // По этому предмету я уже отправлял предложение обмена — повторно нельзя
+            <div className="w-full py-3.5 bg-[#141414] border border-[#262626] rounded-xl text-[#8E8E93] font-semibold text-sm flex items-center justify-center">
+              Вы уже предлагали обмен по этому предмету
+            </div>
+          ) : (
             <button
               onClick={() => {
                 haptic.impact('medium');
@@ -191,11 +224,6 @@ export const ItemDetailPage: React.FC<ItemDetailPageProps> = ({
             >
               Предложить своп
             </button>
-          ) : (
-            // Лот в архиве (обмен уже состоялся) — предлагать обмен нельзя
-            <div className="w-full py-3.5 bg-[#141414] border border-[#262626] rounded-xl text-[#8E8E93] font-semibold text-sm flex items-center justify-center">
-              Предмет больше не участвует в обмене
-            </div>
           )}
         </div>
       </div>
