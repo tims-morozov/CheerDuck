@@ -4,7 +4,9 @@ import { MapPin, ArrowLeftRight, Pencil } from 'lucide-react';
 
 interface ItemCardProps {
   item: Item;
-  onClick: () => void;
+  // Клик по карточке (открыть лот). Необязателен: внутри карточки свопа
+  // карточки предметов могут быть некликабельными.
+  onClick?: () => void;
   // Необязательная кнопка редактирования: показывается только там, где нужна
   // (например, в «Моих лотах» профиля). В ленте чужих вещей не передаётся.
   onEdit?: () => void;
@@ -12,11 +14,15 @@ interface ItemCardProps {
 
 export const ItemCard: React.FC<ItemCardProps> = ({ item, onClick, onEdit }) => {
   const photo = item.images && item.images.length > 0 ? item.images[0] : null;
+  // Интерактив (курсор, отклик на нажатие, hover-рамка) — только у кликабельной карточки
+  const interactive = Boolean(onClick);
 
   return (
     <div
       onClick={onClick}
-      className="bg-[#141414] rounded-2xl overflow-hidden border border-[#262626] hover:border-[#383838] shadow-sm active:scale-[0.98] transition-all cursor-pointer flex flex-col text-left group"
+      className={`bg-[#141414] rounded-2xl overflow-hidden border border-[#262626] shadow-sm flex flex-col text-left group ${
+        interactive ? 'hover:border-[#383838] active:scale-[0.98] transition-all cursor-pointer' : ''
+      }`}
     >
       {/* Изображение лота */}
       <div className="relative aspect-square w-full bg-[#1A1A1A] overflow-hidden">

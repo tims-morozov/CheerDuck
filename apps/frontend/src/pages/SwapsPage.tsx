@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import type { SwapOffer } from '../types';
+import type { Item, SwapOffer } from '../types';
 import { api } from '../api/client';
 import { useTelegram } from '../hooks/useTelegram';
 import { ArrowRightLeft } from 'lucide-react';
 import { SwapCard } from '../components/SwapCard';
 
-export const SwapsPage: React.FC = () => {
+interface SwapsPageProps {
+  // Клик по карточке предмета в свопе — открыть лот (как в ленте).
+  // Вторым аргументом передаём сам оффер: в карточке входящего свопа это
+  // позволяет сразу принять предложение («Принять своп»).
+  onSelectItem?: (item: Item, offer?: SwapOffer) => void;
+}
+
+export const SwapsPage: React.FC<SwapsPageProps> = ({ onSelectItem }) => {
   const { haptic } = useTelegram();
   const [tab, setTab] = useState<'incoming' | 'outgoing'>('incoming');
   const [offers, setOffers] = useState<SwapOffer[]>([]);
@@ -86,6 +93,7 @@ export const SwapsPage: React.FC = () => {
               offer={offer}
               isIncoming={tab === 'incoming'}
               onRespond={handleRespond}
+              onSelectItem={onSelectItem}
             />
           ))}
         </div>
