@@ -80,9 +80,13 @@ export function App() {
 
       {showRules && <OnboardingModal onClose={() => setShowRules(false)} />}
 
-      {!selectedItem && (
-        <Navigation currentTab={currentTab} onTabChange={(tab) => setCurrentTab(tab)} />
-      )}
+      <Navigation
+        currentTab={currentTab}
+        onTabChange={(tab) => {
+          setCurrentTab(tab);
+          setSelectedItem(null);
+        }}
+      />
     </div>
   );
 }

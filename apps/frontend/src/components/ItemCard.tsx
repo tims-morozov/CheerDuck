@@ -42,14 +42,6 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, onClick }) => {
             <span className="truncate">{item.city}</span>
           </div>
         </div>
-
-        {/* Вишлист автора с фирменным лаймовым акцентом */}
-        <div className="mt-1 pt-2 border-t border-[#262626] text-[11px]">
-          <span className="text-[#8E8E93]">Обмен на: </span>
-          <span className="font-bold text-[#CFFF76] line-clamp-1">
-            {item.wishlist || 'Любые предложения'}
-          </span>
-        </div>
       </div>
     </div>
   );

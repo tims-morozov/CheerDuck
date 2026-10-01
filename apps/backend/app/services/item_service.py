@@ -33,7 +33,12 @@ class ItemService:
 
     @staticmethod
     async def get_user_items(session: AsyncSession, user_id: int) -> List[Item]:
-        query = select(Item).where(Item.user_id == user_id).order_by(desc(Item.created_at))
+        query = (
+            select(Item)
+            .options(selectinload(Item.owner))
+            .where(Item.user_id == user_id)
+            .order_by(desc(Item.created_at))
+        )
         result = await session.execute(query)
         return list(result.scalars().all())
 
@@ -51,5 +56,10 @@ class ItemService:
         )
         session.add(item)
         await session.commit()
-        await session.refresh(item)
-        return item
+        # Перечитываем предмет с жадной загрузкой владельца (selectinload).
+        # Без этого при сериализации ответа (ItemOut.owner) сработает ленивая
+        # загрузка relationship в sync-контексте FastAPI — упадёт с
+        # MissingGreenlet и вернёт HTTP 500.
+        query = select(Item).options(selectinload(Item.owner)).where(Item.id == item.id)
+        result = await session.execute(query)
+        return result.scalar_one()

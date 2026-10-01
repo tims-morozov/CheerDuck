@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Item, User } from '../types';
 import { api } from '../api/client';
 import { CheerDuckLogo } from '../components/CheerDuckLogo';
-import { ShieldCheck, HelpCircle, Package, ExternalLink } from 'lucide-react';
+import { ShieldCheck, HelpCircle } from 'lucide-react';
 
 interface ProfilePageProps {
   onShowRules: () => void;
@@ -60,14 +60,13 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onShowRules, onSelectI
         >
           <HelpCircle className="w-4 h-4 text-[#CFFF76]" />
           <span>Поддержка</span>
-          <ExternalLink className="w-3.5 h-3.5 ml-auto text-[#8E8E93]" />
         </a>
       </div>
 
       {/* Мои выложенные предметы */}
       <div>
-        <p className="text-xs font-bold uppercase tracking-wider text-[#8E8E93] mb-2.5 flex items-center gap-1.5">
-          <Package className="w-3.5 h-3.5 text-[#CFFF76]" /> Мои лоты ({myItems.length})
+        <p className="text-xs font-bold text-[#8E8E93] mb-2.5">
+          Мои лоты ({myItems.length})
         </p>
 
         {loading ? (

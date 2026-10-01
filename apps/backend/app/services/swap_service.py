@@ -37,8 +37,21 @@ class SwapService:
         )
         session.add(offer)
         await session.commit()
-        await session.refresh(offer)
-        return offer
+        # Перечитываем предложение с жадной загрузкой связанных объектов.
+        # Иначе сериализация SwapOut (offered_item/target_item/sender/recipient)
+        # вызовет ленивую загрузку и упадёт с MissingGreenlet -> HTTP 500.
+        query = (
+            select(SwapOffer)
+            .options(
+                selectinload(SwapOffer.offered_item),
+                selectinload(SwapOffer.target_item),
+                selectinload(SwapOffer.sender),
+                selectinload(SwapOffer.recipient),
+            )
+            .where(SwapOffer.id == offer.id)
+        )
+        result = await session.execute(query)
+        return result.scalar_one()
 
     @staticmethod
     async def get_user_offers(session: AsyncSession, user_id: int, offer_type: str = "incoming") -> List[SwapOffer]:
