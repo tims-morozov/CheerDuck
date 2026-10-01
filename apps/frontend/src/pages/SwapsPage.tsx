@@ -46,12 +46,12 @@ export const SwapsPage: React.FC<SwapsPageProps> = ({ onSelectItem }) => {
 
   return (
     <div className="pb-28 pt-3 px-4 max-w-md mx-auto w-full text-left bg-black text-white">
-      <h1 className="mb-3 text-white">Предложения обмена</h1>
+      <h1 className="mb-3 text-xl text-white">Предложения обмена</h1>
 
-      <div className="flex bg-[#141414] border border-[#262626] p-1 rounded-xl mb-4">
+      <div className="flex bg-[#141414] border border-[#262626] p-1 rounded-full mb-4">
         <button
           onClick={() => setTab('incoming')}
-          className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
+          className={`flex-1 py-1.5 text-xs font-bold rounded-full transition-all ${
             tab === 'incoming'
               ? 'bg-[#CFFF76] text-black shadow-sm'
               : 'text-[#8E8E93] hover:text-white'
@@ -61,7 +61,7 @@ export const SwapsPage: React.FC<SwapsPageProps> = ({ onSelectItem }) => {
         </button>
         <button
           onClick={() => setTab('outgoing')}
-          className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
+          className={`flex-1 py-1.5 text-xs font-bold rounded-full transition-all ${
             tab === 'outgoing'
               ? 'bg-[#CFFF76] text-black shadow-sm'
               : 'text-[#8E8E93] hover:text-white'
@@ -74,7 +74,7 @@ export const SwapsPage: React.FC<SwapsPageProps> = ({ onSelectItem }) => {
       {loading ? (
         <div className="space-y-3">
           {[1, 2].map((n) => (
-            <div key={n} className="h-32 bg-[#141414] border border-[#262626] rounded-2xl animate-pulse" />
+            <div key={n} className="h-32 bg-[#141414] border border-[#262626] rounded-lg animate-pulse" />
           ))}
         </div>
       ) : offers.length === 0 ? (

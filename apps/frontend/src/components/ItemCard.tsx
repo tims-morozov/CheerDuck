@@ -20,7 +20,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, onClick, onEdit }) => 
   return (
     <div
       onClick={onClick}
-      className={`bg-[#141414] rounded-2xl overflow-hidden border border-[#262626] shadow-sm flex flex-col text-left group ${
+      className={`bg-[#141414] rounded-lg overflow-hidden border border-[#262626] shadow-sm flex flex-col text-left group ${
         interactive ? 'hover:border-[#383838] active:scale-[0.98] transition-all cursor-pointer' : ''
       }`}
     >
@@ -49,7 +49,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, onClick, onEdit }) => 
               onEdit();
             }}
             aria-label="Редактировать лот"
-            className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/70 backdrop-blur-sm border border-white/10 text-white hover:text-[#CFFF76] hover:border-[#CFFF76]/40 active:scale-95 transition-all"
+            className="absolute top-2 right-2 p-1.5 rounded-sm bg-black/70 backdrop-blur-sm border border-white/10 text-white hover:text-[#CFFF76] hover:border-[#CFFF76]/40 active:scale-95 transition-all"
           >
             <Pencil className="w-3.5 h-3.5" />
           </button>

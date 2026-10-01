@@ -9,8 +9,8 @@ interface OnboardingModalProps {
 export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onClose }) => {
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 text-left">
-      <div className="bg-[#141414] w-full max-w-sm rounded-3xl p-6 border border-[#262626] shadow-2xl text-white max-h-[90vh] overflow-y-auto">
-        <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center border border-[#262626] mb-4">
+      <div className="bg-[#141414] w-full max-w-sm rounded-xl p-6 border border-[#262626] shadow-2xl text-white max-h-[90vh] overflow-y-auto">
+        <div className="w-14 h-14 bg-black rounded-lg flex items-center justify-center border border-[#262626] mb-4">
           <CheerDuckLogo size={42} />
         </div>
 
@@ -47,7 +47,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onClose }) => 
 
         <button
           onClick={onClose}
-          className="w-full py-3.5 bg-[#CFFF76] hover:bg-[#bce668] text-black font-extrabold rounded-xl text-sm shadow-md flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+          className="w-full py-3.5 bg-[#CFFF76] hover:bg-[#bce668] text-black font-extrabold rounded-md text-sm shadow-md flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
         >
           <span>Понятно, к обменам</span>
           <ArrowRight className="w-4 h-4 stroke-[2.5]" />

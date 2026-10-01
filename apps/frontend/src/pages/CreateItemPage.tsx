@@ -146,7 +146,7 @@ export const CreateItemPage: React.FC<CreateItemPageProps> = ({
           <ArrowLeft className="w-4 h-4" /> Назад в профиль
         </button>
       )}
-      <h1 className="mb-1 text-white">
+      <h1 className="mb-1 text-xl text-white">
         {isEditing ? 'Редактирование лота' : 'Добавьте предмет'}
       </h1>
       <p className="text-[#8E8E93] mb-4">
@@ -156,7 +156,7 @@ export const CreateItemPage: React.FC<CreateItemPageProps> = ({
       </p>
 
       {error && (
-        <div className="p-3 mb-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-semibold">
+        <div className="p-3 mb-4 rounded-md bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-semibold">
           {error}
         </div>
       )}
@@ -179,7 +179,7 @@ export const CreateItemPage: React.FC<CreateItemPageProps> = ({
                 {photos.map((photo, index) => (
                   <div
                     key={photo.preview}
-                    className="relative w-full aspect-square rounded-lg overflow-hidden border border-[#262626] bg-[#141414]"
+                    className="relative w-full aspect-square rounded-sm overflow-hidden border border-[#262626] bg-[#141414]"
                   >
                     <img
                       src={photo.preview}
@@ -203,7 +203,7 @@ export const CreateItemPage: React.FC<CreateItemPageProps> = ({
                 с первым фото — компактная строка в габаритах остальных полей формы */}
             {photos.length < MAX_PHOTOS && (
               <label
-                className={`w-full rounded-xl border border-dashed border-[#3A3A3A] bg-[#141414] flex items-center justify-center text-[#8E8E93] cursor-pointer hover:border-[#CFFF76] hover:text-[#CFFF76] transition-colors ${
+                className={`w-full rounded-md border border-dashed border-[#3A3A3A] bg-[#141414] flex items-center justify-center text-[#8E8E93] cursor-pointer hover:border-[#CFFF76] hover:text-[#CFFF76] transition-colors ${
                   hasPhotos ? 'gap-2 py-2.5' : 'h-32 flex-col gap-1'
                 }`}
               >
@@ -237,7 +237,7 @@ export const CreateItemPage: React.FC<CreateItemPageProps> = ({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Например: Книга «Чистый код»"
-            className="w-full bg-[#141414] border border-[#262626] text-white text-sm py-2.5 px-3 rounded-xl focus:outline-none focus:border-[#CFFF76]"
+            className="w-full bg-[#141414] border border-[#262626] text-white text-sm py-2.5 px-3 rounded-md focus:outline-none focus:border-[#CFFF76]"
           />
         </div>
 
@@ -255,7 +255,7 @@ export const CreateItemPage: React.FC<CreateItemPageProps> = ({
               required
               value={condition}
               onChange={(e) => setCondition(e.target.value)}
-              className="w-full appearance-none bg-[#141414] border border-[#262626] text-white text-xs font-medium py-2.5 pl-3 pr-9 rounded-xl focus:outline-none focus:border-[#CFFF76]"
+              className="w-full appearance-none bg-[#141414] border border-[#262626] text-white text-xs font-medium py-2.5 pl-3 pr-9 rounded-md focus:outline-none focus:border-[#CFFF76]"
             >
               {CONDITIONS.map((cond) => (
                 <option key={cond} value={cond} className="bg-black text-white">{cond}</option>
@@ -275,7 +275,7 @@ export const CreateItemPage: React.FC<CreateItemPageProps> = ({
               required
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              className="w-full appearance-none bg-[#141414] border border-[#262626] text-white text-xs font-medium py-2.5 pl-3 pr-9 rounded-xl focus:outline-none focus:border-[#CFFF76]"
+              className="w-full appearance-none bg-[#141414] border border-[#262626] text-white text-xs font-medium py-2.5 pl-3 pr-9 rounded-md focus:outline-none focus:border-[#CFFF76]"
             >
               {CITIES.map((c) => (
                 <option key={c} value={c} className="bg-black text-white">{c}</option>
@@ -295,14 +295,14 @@ export const CreateItemPage: React.FC<CreateItemPageProps> = ({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Нюансы, комплект, состояние..."
-            className="w-full bg-[#141414] border border-[#262626] text-white text-sm py-2 px-3 rounded-xl focus:outline-none focus:border-[#CFFF76] resize-none"
+            className="w-full bg-[#141414] border border-[#262626] text-white text-sm py-2 px-3 rounded-md focus:outline-none focus:border-[#CFFF76] resize-none"
           />
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="mt-2 w-full py-3.5 bg-[#CFFF76] hover:bg-[#bce668] rounded-xl text-black font-extrabold text-sm shadow-md flex items-center justify-center disabled:opacity-50 active:scale-[0.98] transition-all"
+          className="mt-2 w-full py-3.5 bg-[#CFFF76] hover:bg-[#bce668] rounded-md text-black font-extrabold text-sm shadow-md flex items-center justify-center disabled:opacity-50 active:scale-[0.98] transition-all"
         >
           {loading
             ? (isEditing ? 'Сохранение...' : 'Публикация...')

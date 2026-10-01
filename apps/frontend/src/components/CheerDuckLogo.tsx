@@ -12,7 +12,7 @@ export const CheerDuckLogo: React.FC<CheerDuckLogoProps> = ({ className = '', si
       alt="CheerDuck Logo"
       width={size}
       height={size}
-      className={`rounded-xl object-contain shrink-0 ${className}`}
+      className={`rounded-md object-contain shrink-0 ${className}`}
     />
   );
 };

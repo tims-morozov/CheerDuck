@@ -63,7 +63,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--tg-color-bg)] text-[var(--tg-color-text)] flex flex-col font-sans">
+    <div className="min-h-screen bg-black text-white flex flex-col font-sans">
       <main className="flex-1 w-full max-w-md mx-auto">
         {editingItem ? (
           <CreateItemPage

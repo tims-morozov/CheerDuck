@@ -130,7 +130,7 @@ export const ItemDetailPage: React.FC<ItemDetailPageProps> = ({
       <h1 className="leading-tight text-white mb-3">{item.title}</h1>
 
       {/* Фото предмета */}
-      <div className="relative aspect-square w-full bg-[#141414] rounded-2xl overflow-hidden mb-3 shadow-sm border border-[#262626]">
+      <div className="relative aspect-square w-full bg-[#141414] rounded-lg overflow-hidden mb-3 shadow-sm border border-[#262626]">
         {item.images && item.images.length > 0 ? (
           <img
             src={item.images[0]}
@@ -192,7 +192,7 @@ export const ItemDetailPage: React.FC<ItemDetailPageProps> = ({
                 haptic.impact('medium');
                 setConfirmOpen(true);
               }}
-              className="w-full py-3.5 bg-[#141414] border border-rose-500/40 text-rose-400 hover:border-rose-500 hover:bg-rose-500/10 active:scale-[0.98] transition-all rounded-xl font-extrabold text-sm flex items-center justify-center"
+              className="w-full py-3.5 bg-[#141414] border border-rose-500/40 text-rose-400 hover:border-rose-500 hover:bg-rose-500/10 active:scale-[0.98] transition-all rounded-md font-extrabold text-sm flex items-center justify-center"
             >
               Удалить предмет
             </button>
@@ -200,18 +200,18 @@ export const ItemDetailPage: React.FC<ItemDetailPageProps> = ({
             <button
               onClick={handleAcceptSwap}
               disabled={accepting}
-              className="w-full py-3.5 bg-[#CFFF76] hover:bg-[#bce668] active:scale-[0.98] transition-all rounded-xl text-black font-extrabold text-sm shadow-lg flex items-center justify-center disabled:opacity-60 disabled:active:scale-100"
+              className="w-full py-3.5 bg-[#CFFF76] hover:bg-[#bce668] active:scale-[0.98] transition-all rounded-md text-black font-extrabold text-sm shadow-lg flex items-center justify-center disabled:opacity-60 disabled:active:scale-100"
             >
               {accepting ? 'Принимаем…' : 'Принять своп'}
             </button>
           ) : !isItemAvailable ? (
             // Лот в архиве (обмен уже состоялся) — предлагать обмен нельзя
-            <div className="w-full py-3.5 bg-[#141414] border border-[#262626] rounded-xl text-[#8E8E93] font-semibold text-sm flex items-center justify-center">
+            <div className="w-full py-3.5 bg-[#141414] border border-[#262626] rounded-md text-[#8E8E93] font-semibold text-sm flex items-center justify-center">
               Предмет больше не участвует в обмене
             </div>
           ) : alreadyOffered ? (
             // По этому предмету я уже отправлял предложение обмена — повторно нельзя
-            <div className="w-full py-3.5 bg-[#141414] border border-[#262626] rounded-xl text-[#8E8E93] font-semibold text-sm flex items-center justify-center">
+            <div className="w-full py-3.5 bg-[#141414] border border-[#262626] rounded-md text-[#8E8E93] font-semibold text-sm flex items-center justify-center">
               Вы уже предлагали обмен по этому предмету
             </div>
           ) : (
@@ -220,7 +220,7 @@ export const ItemDetailPage: React.FC<ItemDetailPageProps> = ({
                 haptic.impact('medium');
                 onOpenSwapModal(item);
               }}
-              className="w-full py-3.5 bg-[#CFFF76] hover:bg-[#bce668] active:scale-[0.98] transition-all rounded-xl text-black font-extrabold text-sm shadow-lg flex items-center justify-center gap-2"
+              className="w-full py-3.5 bg-[#CFFF76] hover:bg-[#bce668] active:scale-[0.98] transition-all rounded-md text-black font-extrabold text-sm shadow-lg flex items-center justify-center gap-2"
             >
               Предложить своп
             </button>

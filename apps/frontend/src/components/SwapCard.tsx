@@ -16,7 +16,7 @@ interface SwapCardProps {
 // Заглушка на случай, если связанный предмет недоступен (offered_item/target_item = null):
 // держим сетку одинаковой высоты, чтобы карточка не «прыгала».
 const SwapItemPlaceholder: React.FC = () => (
-  <div className="rounded-2xl border border-[#262626] bg-[#141414] aspect-square flex items-center justify-center">
+  <div className="rounded-lg border border-[#262626] bg-[#141414] aspect-square flex items-center justify-center">
     <ArrowLeftRight className="w-6 h-6 opacity-40 text-[#CFFF76]" />
   </div>
 );
@@ -40,7 +40,7 @@ export const SwapCard: React.FC<SwapCardProps> = ({ offer, isIncoming, onRespond
 
   return (
     <div
-      className={`bg-[#141414] border rounded-2xl p-4 shadow-sm text-left ${
+      className={`bg-[#141414] border rounded-lg p-4 shadow-sm text-left ${
         isStale ? 'border-[#202020]' : 'border-[#262626]'
       }`}
     >
@@ -84,7 +84,7 @@ export const SwapCard: React.FC<SwapCardProps> = ({ offer, isIncoming, onRespond
         </div>
 
         {offer.comment && (
-          <p className="bg-[#1A1A1A] text-zinc-300 text-[15px] p-2.5 rounded-xl mt-3 border border-[#262626]/40 whitespace-pre-line leading-relaxed">
+          <p className="bg-[#1A1A1A] text-zinc-300 text-[15px] p-2.5 rounded-md mt-3 border border-[#262626]/40 whitespace-pre-line leading-relaxed">
             «{offer.comment}»
           </p>
         )}
@@ -95,7 +95,7 @@ export const SwapCard: React.FC<SwapCardProps> = ({ offer, isIncoming, onRespond
           href={`https://t.me/${offer.contact_username}`}
           target="_blank"
           rel="noreferrer"
-          className="mt-3 w-full py-2.5 bg-[#CFFF76] hover:bg-[#bce668] text-black rounded-xl text-xs font-bold flex items-center justify-center shadow-sm active:scale-[0.98] transition-all"
+          className="mt-3 w-full py-2.5 bg-[#CFFF76] hover:bg-[#bce668] text-black rounded-md text-xs font-bold flex items-center justify-center shadow-sm active:scale-[0.98] transition-all"
         >
           Связаться с @{offer.contact_username}
         </a>
@@ -107,13 +107,13 @@ export const SwapCard: React.FC<SwapCardProps> = ({ offer, isIncoming, onRespond
         <div className="flex gap-2 mt-3">
           <button
             onClick={() => onRespond(offer.id, true)}
-            className="flex-1 py-2.5 bg-[#CFFF76] hover:bg-[#bce668] text-black rounded-xl text-xs font-bold flex items-center justify-center shadow-sm active:scale-[0.98] transition-all"
+            className="flex-1 py-2.5 bg-[#CFFF76] hover:bg-[#bce668] text-black rounded-md text-xs font-bold flex items-center justify-center shadow-sm active:scale-[0.98] transition-all"
           >
             Принять
           </button>
           <button
             onClick={() => onRespond(offer.id, false)}
-            className="flex-1 py-2.5 bg-[#1A1A1A] border border-[#262626] text-[#8E8E93] hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center active:scale-[0.98] transition-all"
+            className="flex-1 py-2.5 bg-[#1A1A1A] border border-[#262626] text-[#8E8E93] hover:text-white rounded-md text-xs font-semibold flex items-center justify-center active:scale-[0.98] transition-all"
           >
             Отклонить
           </button>
@@ -126,7 +126,7 @@ export const SwapCard: React.FC<SwapCardProps> = ({ offer, isIncoming, onRespond
         <button
           type="button"
           disabled
-          className="mt-3 w-full py-2.5 bg-[#1A1A1A] border border-[#262626] text-[#8E8E93] rounded-xl text-xs font-bold flex items-center justify-center cursor-not-allowed select-none"
+          className="mt-3 w-full py-2.5 bg-[#1A1A1A] border border-[#262626] text-[#8E8E93] rounded-md text-xs font-bold flex items-center justify-center cursor-not-allowed select-none"
         >
           Предмет больше не активен
         </button>

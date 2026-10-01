@@ -94,7 +94,7 @@ export const FeedPage: React.FC<FeedPageProps> = ({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Поиск вещей для свопа..."
-          className="w-full bg-[#141414] text-white text-sm py-2.5 pl-9 pr-3 rounded-xl border border-[#262626] focus:outline-none focus:border-[#CFFF76]"
+          className="w-full bg-[#141414] text-white text-sm py-2.5 pl-9 pr-3 rounded-md border border-[#262626] focus:outline-none focus:border-[#CFFF76]"
         />
       </div>
 
@@ -102,7 +102,7 @@ export const FeedPage: React.FC<FeedPageProps> = ({
       {loading ? (
         <div className="grid grid-cols-2 gap-3">
           {[1, 2, 3, 4].map((n) => (
-            <div key={n} className="aspect-square bg-[#141414] border border-[#262626] animate-pulse rounded-2xl" />
+            <div key={n} className="aspect-square bg-[#141414] border border-[#262626] animate-pulse rounded-lg" />
           ))}
         </div>
       ) : filteredItems.length === 0 ? (

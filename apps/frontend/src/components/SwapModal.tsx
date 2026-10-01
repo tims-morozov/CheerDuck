@@ -55,7 +55,7 @@ export const SwapModal: React.FC<SwapModalProps> = ({ targetItem, onClose, onSuc
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="bg-[#141414] w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 text-left border border-[#262626] shadow-2xl max-h-[90vh] overflow-y-auto text-white">
+      <div className="bg-[#141414] w-full max-w-md rounded-t-xl sm:rounded-lg p-5 text-left border border-[#262626] shadow-2xl max-h-[90vh] overflow-y-auto text-white">
         <div className="flex items-center justify-between mb-4">
           <h2 className="flex items-center gap-2 text-white">
             <ArrowRightLeft className="w-5 h-5 text-[#CFFF76]" /> Предложить своп
@@ -65,7 +65,7 @@ export const SwapModal: React.FC<SwapModalProps> = ({ targetItem, onClose, onSuc
           </button>
         </div>
 
-        <div className="mb-4 p-3 bg-[#1A1A1A] border border-[#262626] rounded-xl text-xs">
+        <div className="mb-4 p-3 bg-[#1A1A1A] border border-[#262626] rounded-md text-xs">
           <span className="text-[#8E8E93] block mb-0.5">Вы хотите получить:</span>
           <span className="font-medium text-white line-clamp-1">{targetItem.title}</span>
         </div>
@@ -75,9 +75,9 @@ export const SwapModal: React.FC<SwapModalProps> = ({ targetItem, onClose, onSuc
             Выберите ваш предмет для обмена:
           </label>
           {fetching ? (
-            <div className="h-16 bg-[#1A1A1A] rounded-xl animate-pulse" />
+            <div className="h-16 bg-[#1A1A1A] rounded-md animate-pulse" />
           ) : myItems.length === 0 ? (
-            <div className="p-4 bg-[#1A1A1A] border border-[#CFFF76]/30 rounded-xl text-xs text-[#CFFF76]">
+            <div className="p-4 bg-[#1A1A1A] border border-[#CFFF76]/30 rounded-md text-xs text-[#CFFF76]">
               У вас пока нет активных предметов для обмена. Сначала добавьте свой лот во вкладке «Добавить».
             </div>
           ) : (
@@ -91,7 +91,7 @@ export const SwapModal: React.FC<SwapModalProps> = ({ targetItem, onClose, onSuc
                       haptic.selection();
                       setSelectedItemId(item.id);
                     }}
-                    className={`p-2.5 rounded-xl border text-xs cursor-pointer transition-all ${
+                    className={`p-2.5 rounded-md border text-xs cursor-pointer transition-all ${
                       isSelected
                         ? 'border-[#CFFF76] bg-[#CFFF76]/10 text-white font-bold'
                         : 'border-[#262626] bg-[#1A1A1A] text-[#8E8E93] hover:border-zinc-500'
@@ -114,14 +114,14 @@ export const SwapModal: React.FC<SwapModalProps> = ({ targetItem, onClose, onSuc
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             placeholder="Например: могу встретиться в метро или привезти лично"
-            className="w-full bg-[#1A1A1A] border border-[#262626] text-white text-xs p-2.5 rounded-xl focus:outline-none focus:border-[#CFFF76] resize-none"
+            className="w-full bg-[#1A1A1A] border border-[#262626] text-white text-xs p-2.5 rounded-md focus:outline-none focus:border-[#CFFF76] resize-none"
           />
         </div>
 
         <button
           onClick={handleSendOffer}
           disabled={loading || myItems.length === 0}
-          className="w-full py-3.5 bg-[#CFFF76] hover:bg-[#bce668] text-black font-extrabold rounded-xl text-sm shadow-md flex items-center justify-center disabled:opacity-40 active:scale-[0.98] transition-all"
+          className="w-full py-3.5 bg-[#CFFF76] hover:bg-[#bce668] text-black font-extrabold rounded-md text-sm shadow-md flex items-center justify-center disabled:opacity-40 active:scale-[0.98] transition-all"
         >
           {loading ? 'Отправка...' : 'Отправить предложение'}
         </button>

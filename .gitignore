@@ -39,6 +39,9 @@ PROJECT_STATUS.md
 ARCHITECTURE.md
 .cursorrules
 
+# --- Локальные бэкапы для откатов (не публикуются / Local rollback backups) ---
+.rollback/
+
 # --- Редакторы / ОС (Editors / OS) ---
 .vscode/
 .idea/

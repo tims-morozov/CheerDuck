@@ -19,7 +19,7 @@ CheerDuck is a cozy Telegram mini-app for swaps. Here you can connect things and
 
 | Слой / Layer | Технологии / Technologies |
 |--------------|---------------------------|
-| **Backend** | Python 3.12, FastAPI, SQLAlchemy 2.0 (Async), aiosqlite / asyncpg, Pydantic v2, Aiogram 3 |
+| **Backend** | Python 3.12, FastAPI, SQLAlchemy 2.x (Async), aiosqlite / asyncpg, Pydantic v2, Aiogram 3 |
 | **Frontend** | React 19, TypeScript, Vite, Tailwind CSS v4, Lucide Icons, Telegram WebApp SDK |
 | **Безопасность / Security** | HMAC-SHA256 валидация Telegram `initData`, сокрытие контактов до обоюдного согласия / contacts hidden until both parties agree |
 
