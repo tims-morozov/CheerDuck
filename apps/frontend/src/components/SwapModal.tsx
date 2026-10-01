@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Item } from '../types';
 import { api } from '../api/client';
 import { useTelegram } from '../hooks/useTelegram';
-import { X, ArrowRightLeft, Send } from 'lucide-react';
+import { X, ArrowRightLeft } from 'lucide-react';
 
 interface SwapModalProps {
   targetItem: Item;
@@ -58,7 +58,7 @@ export const SwapModal: React.FC<SwapModalProps> = ({ targetItem, onClose, onSuc
       <div className="bg-[#141414] w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 text-left border border-[#262626] shadow-2xl max-h-[90vh] overflow-y-auto text-white">
         <div className="flex items-center justify-between mb-4">
           <h2 className="flex items-center gap-2 text-white">
-            <ArrowRightLeft className="w-5 h-5 text-[#CFFF76]" /> Предложить обмен
+            <ArrowRightLeft className="w-5 h-5 text-[#CFFF76]" /> Предложить своп
           </h2>
           <button onClick={onClose} className="p-1 rounded-full text-[#8E8E93] hover:text-white">
             <X className="w-5 h-5" />
@@ -121,9 +121,8 @@ export const SwapModal: React.FC<SwapModalProps> = ({ targetItem, onClose, onSuc
         <button
           onClick={handleSendOffer}
           disabled={loading || myItems.length === 0}
-          className="w-full py-3.5 bg-[#CFFF76] hover:bg-[#bce668] text-black font-extrabold rounded-xl text-sm shadow-md flex items-center justify-center gap-2 disabled:opacity-40 active:scale-[0.98] transition-all"
+          className="w-full py-3.5 bg-[#CFFF76] hover:bg-[#bce668] text-black font-extrabold rounded-xl text-sm shadow-md flex items-center justify-center disabled:opacity-40 active:scale-[0.98] transition-all"
         >
-          <Send className="w-4 h-4 stroke-[2.5]" />
           {loading ? 'Отправка...' : 'Отправить предложение'}
         </button>
       </div>

@@ -11,12 +11,14 @@ interface FeedPageProps {
   onSelectItem: (item: Item) => void;
   selectedCity: string;
   onCityChange: (city: string) => void;
+  currentUserId?: number;
 }
 
 export const FeedPage: React.FC<FeedPageProps> = ({
   onSelectItem,
   selectedCity,
   onCityChange,
+  currentUserId,
 }) => {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -38,7 +40,12 @@ export const FeedPage: React.FC<FeedPageProps> = ({
     loadFeed();
   }, [selectedCity]);
 
-  const filteredItems = items.filter((item) =>
+  // Свои лоты в ленте не показываем: лента — витрина чужих вещей для свопа.
+  // currentUserId приходит с бэкенда (GET /users/me) асинхронно: пока он undefined,
+  // фильтр ничего не скрывает, а после ответа React перерисовывает список.
+  const otherItems = items.filter((item) => item.user_id !== currentUserId);
+
+  const filteredItems = otherItems.filter((item) =>
     item.title.toLowerCase().includes(search.toLowerCase())
   );
 

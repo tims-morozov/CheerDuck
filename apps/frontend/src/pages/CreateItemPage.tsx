@@ -1,31 +1,44 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { api } from '../api/client';
 import { useTelegram } from '../hooks/useTelegram';
-import { Camera, ChevronDown, X } from 'lucide-react';
+import { Item } from '../types';
+import { Camera, ChevronDown, X, ArrowLeft } from 'lucide-react';
 
 const CONDITIONS = ['Новое', 'Отличное', 'Хорошее', 'С нюансами'];
 const CITIES = ['Москва', 'Санкт-Петербург', 'Казань', 'Екатеринбург', 'Новосибирск'];
 // Максимум фото на один предмет (минимум — 1, проверяется при публикации)
 const MAX_PHOTOS = 5;
 
-// Выбранный для загрузки файл вместе со своим blob-превью
+// Фото лота: у нового файла — file и blob-превью, у уже сохранённого — только ссылка
 interface PhotoItem {
-  file: File;
+  file?: File;
   preview: string;
 }
 
 interface CreateItemPageProps {
   onSuccess: () => void;
   defaultCity: string;
+  // Если передан лот — форма работает в режиме редактирования
+  editItem?: Item | null;
+  onCancel?: () => void;
 }
 
-export const CreateItemPage: React.FC<CreateItemPageProps> = ({ onSuccess, defaultCity }) => {
+export const CreateItemPage: React.FC<CreateItemPageProps> = ({
+  onSuccess,
+  defaultCity,
+  editItem = null,
+  onCancel,
+}) => {
   const { haptic } = useTelegram();
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [condition, setCondition] = useState(CONDITIONS[1]);
-  const [city, setCity] = useState(defaultCity || 'Москва');
-  const [photos, setPhotos] = useState<PhotoItem[]>([]);
+  const isEditing = !!editItem;
+  const [title, setTitle] = useState(editItem?.title ?? '');
+  const [description, setDescription] = useState(editItem?.description ?? '');
+  const [condition, setCondition] = useState(editItem?.condition ?? CONDITIONS[1]);
+  const [city, setCity] = useState(editItem?.city ?? (defaultCity || 'Москва'));
+  // В режиме редактирования уже сохранённые фото приходят ссылками (без файла)
+  const [photos, setPhotos] = useState<PhotoItem[]>(() =>
+    editItem ? editItem.images.map((url) => ({ preview: url })) : []
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -36,7 +49,10 @@ export const CreateItemPage: React.FC<CreateItemPageProps> = ({ onSuccess, defau
   }, [photos]);
   useEffect(() => {
     return () => {
-      photosRef.current.forEach((photo) => URL.revokeObjectURL(photo.preview));
+      // Освобождаем только blob-превью новых файлов; ссылки уже сохранённых фото не трогаем
+      photosRef.current.forEach((photo) => {
+        if (photo.file) URL.revokeObjectURL(photo.preview);
+      });
     };
   }, []);
 
@@ -62,7 +78,7 @@ export const CreateItemPage: React.FC<CreateItemPageProps> = ({ onSuccess, defau
   const removePhoto = (index: number) => {
     setPhotos((prev) => {
       const target = prev[index];
-      if (target) URL.revokeObjectURL(target.preview);
+      if (target?.file) URL.revokeObjectURL(target.preview);
       return prev.filter((_, i) => i !== index);
     });
   };
@@ -87,21 +103,28 @@ export const CreateItemPage: React.FC<CreateItemPageProps> = ({ onSuccess, defau
     setError('');
 
     try {
-      // Сначала загружаем файлы на сервер, затем публикуем лот со ссылками на них
-      const imageUrls = await api.uploadImages(photos.map((photo) => photo.file));
+      // Новые файлы загружаем на сервер, уже сохранённые фото оставляем как есть
+      const newFiles = photos
+        .filter((photo) => photo.file)
+        .map((photo) => photo.file as File);
+      const uploadedUrls = newFiles.length > 0 ? await api.uploadImages(newFiles) : [];
+      // Восстанавливаем порядок: для новых фото берём загруженную ссылку, для старых — прежнюю
+      let uploadIndex = 0;
+      const images = photos.map((photo) =>
+        photo.file ? uploadedUrls[uploadIndex++] : photo.preview
+      );
 
-      await api.createItem({
-        title,
-        description,
-        condition,
-        city,
-        images: imageUrls,
-      });
+      const payload = { title, description, condition, city, images };
+      if (editItem) {
+        await api.updateItem(editItem.id, payload);
+      } else {
+        await api.createItem(payload);
+      }
 
       haptic.notification('success');
       onSuccess();
     } catch (err: any) {
-      setError(err.message || 'Ошибка публикации');
+      setError(err.message || (isEditing ? 'Ошибка сохранения' : 'Ошибка публикации'));
       haptic.notification('error');
     } finally {
       setLoading(false);
@@ -114,9 +137,22 @@ export const CreateItemPage: React.FC<CreateItemPageProps> = ({ onSuccess, defau
 
   return (
     <div className="pb-28 pt-3 px-4 max-w-md mx-auto w-full text-left bg-black text-white">
-      <h1 className="mb-1 text-white">Добавьте предмет</h1>
+      {isEditing && (
+        <button
+          type="button"
+          onClick={onCancel}
+          className="flex items-center gap-1.5 text-xs font-semibold text-[#8E8E93] hover:text-[#CFFF76] transition-colors mb-3.5"
+        >
+          <ArrowLeft className="w-4 h-4" /> Назад в профиль
+        </button>
+      )}
+      <h1 className="mb-1 text-white">
+        {isEditing ? 'Редактирование лота' : 'Добавьте предмет'}
+      </h1>
       <p className="text-[#8E8E93] mb-4">
-        Опишите предмет: состояние, комплект, нюансы
+        {isEditing
+          ? 'Обновите фото и описание, измените параметры'
+          : 'Опишите предмет: состояние, комплект, нюансы'}
       </p>
 
       {error && (
@@ -268,7 +304,9 @@ export const CreateItemPage: React.FC<CreateItemPageProps> = ({ onSuccess, defau
           disabled={loading}
           className="mt-2 w-full py-3.5 bg-[#CFFF76] hover:bg-[#bce668] rounded-xl text-black font-extrabold text-sm shadow-md flex items-center justify-center disabled:opacity-50 active:scale-[0.98] transition-all"
         >
-          {loading ? 'Публикация...' : 'Опубликовать для свопа'}
+          {loading
+            ? (isEditing ? 'Сохранение...' : 'Публикация...')
+            : (isEditing ? 'Сохранить изменения' : 'Опубликовать для свопа')}
         </button>
       </form>
     </div>

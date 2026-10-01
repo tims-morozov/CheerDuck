@@ -61,6 +61,15 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
+  updateItem: (id: number, data: Omit<Item, 'id' | 'user_id' | 'status' | 'created_at' | 'owner' | 'wishlist'>) =>
+    request<Item>(`/items/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+  deleteItem: (id: number) =>
+    request<{ status: string }>(`/items/${id}`, {
+      method: 'DELETE',
+    }),
 
   // Загрузка фото предмета (до 5 файлов за раз) — возвращает относительные URL
   uploadImages: async (files: File[]): Promise<string[]> => {

@@ -2,14 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { Item, User } from '../types';
 import { api } from '../api/client';
 import { CheerDuckLogo } from '../components/CheerDuckLogo';
-import { ShieldCheck, HelpCircle } from 'lucide-react';
+import { ShieldCheck, HelpCircle, Pencil } from 'lucide-react';
 
 interface ProfilePageProps {
   onShowRules: () => void;
   onSelectItem: (item: Item) => void;
+  onEditItem: (item: Item) => void;
 }
 
-export const ProfilePage: React.FC<ProfilePageProps> = ({ onShowRules, onSelectItem }) => {
+export const ProfilePage: React.FC<ProfilePageProps> = ({ onShowRules, onSelectItem, onEditItem }) => {
   const [user, setUser] = useState<User | null>(null);
   const [myItems, setMyItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,21 +82,24 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onShowRules, onSelectI
               <div
                 key={item.id}
                 onClick={() => onSelectItem(item)}
-                className="p-3.5 bg-[#141414] border border-[#262626] hover:border-[#CFFF76]/50 rounded-xl flex items-center justify-between cursor-pointer transition-all"
+                className="p-3.5 bg-[#141414] border border-[#262626] hover:border-[#CFFF76]/50 rounded-xl flex items-center justify-between gap-3 cursor-pointer transition-all"
               >
-                <div>
+                <div className="min-w-0">
                   <h3 className="text-sm line-clamp-1 text-white">{item.title}</h3>
                   <span className="text-[10px] text-[#8E8E93]">{item.city}</span>
                 </div>
-                <span
-                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                    item.status === 'active'
-                      ? 'bg-[#CFFF76] text-black'
-                      : 'bg-[#1A1A1A] border border-[#262626] text-[#8E8E93]'
-                  }`}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    // Не открываем карточку лота — только запускаем редактирование
+                    e.stopPropagation();
+                    onEditItem(item);
+                  }}
+                  aria-label="Редактировать лот"
+                  className="shrink-0 p-2 rounded-lg bg-[#1A1A1A] border border-[#262626] text-[#8E8E93] hover:text-[#CFFF76] hover:border-[#CFFF76]/40 active:scale-95 transition-all"
                 >
-                  {item.status === 'active' ? 'Активен' : 'В сделке'}
-                </span>
+                  <Pencil className="w-3.5 h-3.5" />
+                </button>
               </div>
             ))}
           </div>

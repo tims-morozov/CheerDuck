@@ -1,9 +1,11 @@
 from typing import List, Optional
-from sqlalchemy import select, desc
+from sqlalchemy import select, desc, delete, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+from fastapi import HTTPException
 from app.models.item import Item, ItemStatus
-from app.schemas.schemas import ItemCreate
+from app.models.swap import SwapOffer
+from app.schemas.schemas import ItemCreate, ItemUpdate
 
 class ItemService:
     @staticmethod
@@ -63,3 +65,54 @@ class ItemService:
         query = select(Item).options(selectinload(Item.owner)).where(Item.id == item.id)
         result = await session.execute(query)
         return result.scalar_one()
+
+    @staticmethod
+    async def update_item(session: AsyncSession, user_id: int, item_id: int, data: ItemUpdate) -> Item:
+        """
+        Редактирование своего лота. Менять лот может только его владелец;
+        обновляются лишь поля, переданные в запросе.
+        """
+        result = await session.execute(select(Item).where(Item.id == item_id))
+        item = result.scalar_one_or_none()
+        if not item:
+            raise HTTPException(status_code=404, detail="Предмет не найден")
+        if item.user_id != user_id:
+            raise HTTPException(status_code=403, detail="Можно редактировать только свои лоты")
+
+        for field, value in data.model_dump(exclude_unset=True).items():
+            setattr(item, field, value)
+
+        await session.commit()
+        # Перечитываем с жадной загрузкой владельца — иначе ItemOut.owner
+        # упадёт с MissingGreenlet (см. комментарий в create_item)
+        query = select(Item).options(selectinload(Item.owner)).where(Item.id == item_id)
+        result = await session.execute(query)
+        return result.scalar_one()
+
+    @staticmethod
+    async def delete_item(session: AsyncSession, user_id: int, item_id: int) -> None:
+        """
+        Удаление своего лота. Удалять лот может только его владелец.
+
+        Вместе с лотом удаляются связанные предложения обмена: в SQLite внешние
+        ключи по умолчанию не форсируются (PRAGMA foreign_keys выключен), поэтому
+        ON DELETE CASCADE на swap_offers не срабатывает и оставляет «висячие»
+        оферы. Чистим их вручную — так же работает и на PostgreSQL.
+        """
+        result = await session.execute(select(Item).where(Item.id == item_id))
+        item = result.scalar_one_or_none()
+        if not item:
+            raise HTTPException(status_code=404, detail="Предмет не найден")
+        if item.user_id != user_id:
+            raise HTTPException(status_code=403, detail="Можно удалять только свои лоты")
+
+        await session.execute(
+            delete(SwapOffer).where(
+                or_(
+                    SwapOffer.offered_item_id == item_id,
+                    SwapOffer.target_item_id == item_id,
+                )
+            )
+        )
+        await session.delete(item)
+        await session.commit()

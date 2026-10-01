@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, File, Query, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.core.security import get_current_user, TelegramUser
-from app.schemas.schemas import UserOut, UserUpdateCity, ItemOut, ItemCreate, SwapOut, SwapCreate, UploadOut
+from app.schemas.schemas import UserOut, UserUpdateCity, ItemOut, ItemCreate, ItemUpdate, SwapOut, SwapCreate, UploadOut
 from app.services.user_service import UserService
 from app.services.item_service import ItemService
 from app.services.swap_service import SwapService
@@ -68,6 +68,26 @@ async def create_item(
     # Убедимся, что пользователь есть в БД
     await UserService.get_or_create(db, current_user)
     return await ItemService.create_item(db, current_user.id, data)
+
+@api_router.patch("/items/{item_id}", response_model=ItemOut)
+async def update_item(
+    item_id: int,
+    data: ItemUpdate,
+    current_user: TelegramUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Редактирование своего предмета (только владелец)"""
+    return await ItemService.update_item(db, current_user.id, item_id, data)
+
+@api_router.delete("/items/{item_id}")
+async def delete_item(
+    item_id: int,
+    current_user: TelegramUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Удаление своего предмета (только владелец). Возвращает статус операции."""
+    await ItemService.delete_item(db, current_user.id, item_id)
+    return {"status": "deleted"}
 
 # --- Загрузка файлов (фото предметов) ---
 @api_router.post("/uploads", response_model=UploadOut)

@@ -31,6 +31,14 @@ class ItemCreate(BaseModel):
     images: List[str] = []
     city: str
 
+class ItemUpdate(BaseModel):
+    """Частичное обновление своего лота: приходят только переданные поля."""
+    title: Optional[str] = None
+    description: Optional[str] = None
+    condition: Optional[str] = None
+    images: Optional[List[str]] = None
+    city: Optional[str] = None
+
 class ItemOut(BaseModel):
     id: int
     user_id: int
