@@ -127,6 +127,13 @@ class SwapService:
             raise HTTPException(status_code=400, detail="На это предложение уже дан ответ")
 
         if accept:
+            # Принять сделку можно, только пока оба предмета активны. Если лот уже
+            # выбыл из обмена (архив/модерация), завершить оффер нельзя — на фронте
+            # такая карточка приглушается и подписывается «Предмет больше не активен».
+            offered_active = offer.offered_item is not None and offer.offered_item.status == ItemStatus.ACTIVE
+            target_active = offer.target_item is not None and offer.target_item.status == ItemStatus.ACTIVE
+            if not (offered_active and target_active):
+                raise HTTPException(status_code=400, detail="Один из предметов больше не участвует в обмене")
             offer.status = SwapStatus.ACCEPTED
             # Сделка состоялась — обе вещи уходят в архив (ItemStatus.SWAPPED):
             # лента отдаёт только активные лоты, поэтому архивированные пропадают
