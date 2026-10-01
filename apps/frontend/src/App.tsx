@@ -11,22 +11,42 @@ import { OnboardingModal } from './components/OnboardingModal';
 import { useTelegram } from './hooks/useTelegram';
 import { api } from './api/client';
 
+// Открытая в разделе карточка предмета и оффер, из которого её открыли.
+// Оффер непустой, только если лот открыли из входящего предложения обмена:
+// тогда в карточке показываем кнопку «Принять своп» вместо «Предложить своп».
+interface TabDetail {
+  item: Item | null;
+  offer: SwapOffer | null;
+}
+
+// Пустое состояние карточек для всех разделов (лента, добавление, свопы, профиль).
+const emptyTabDetails = (): Record<TabType, TabDetail> => ({
+  feed: { item: null, offer: null },
+  create: { item: null, offer: null },
+  swaps: { item: null, offer: null },
+  profile: { item: null, offer: null },
+});
+
 export function App() {
   const { ready } = useTelegram();
   const [currentTab, setCurrentTab] = useState<TabType>('feed');
   const [selectedCity, setSelectedCity] = useState<string>('Все города');
-  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  // Открытая карточка у каждого раздела своя. Благодаря этому переключение
+  // вкладок не закрывает карточку: вернувшись в раздел, пользователь увидит
+  // её открытой точно так же, как оставлял.
+  const [tabDetails, setTabDetails] = useState<Record<TabType, TabDetail>>(emptyTabDetails);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [swapTargetItem, setSwapTargetItem] = useState<Item | null>(null);
-  // Оффер входящего свопа, из которого открыли карточку предмета: позволяет
-  // показать в карточке кнопку «Принять своп» вместо «Предложить своп».
-  const [activeSwapOffer, setActiveSwapOffer] = useState<SwapOffer | null>(null);
   const [showRules, setShowRules] = useState<boolean>(false);
   // Идентификатор текущего пользователя берём с бэкенда (GET /users/me), а не из
   // сырого tg.initDataUnsafe.user.id: сервер в DEBUG-режиме отдаёт тестового
   // пользователя (id=99999999), и только этот id совпадает с item.user_id
   // опубликованных лотов. Иначе «свой лот» не определяется.
   const [currentUserId, setCurrentUserId] = useState<number | undefined>(undefined);
+
+  // Карточка, открытая в текущем разделе, и оффер, из которого её открыли.
+  const selectedItem = tabDetails[currentTab].item;
+  const activeSwapOffer = tabDetails[currentTab].offer;
 
   useEffect(() => {
     ready();
@@ -42,16 +62,17 @@ export function App() {
     }
   }, []);
 
-  // Открытие карточки предмета. Из свопов вместе с лотом приходит оффер —
-  // тогда карточка знает, что можно принять предложение прямо в ней.
+  // Открытие карточки предмета: сохраняем её за текущим разделом. Из свопов
+  // вместе с лотом приходит оффер — тогда карточка знает, что можно принять
+  // предложение прямо в ней.
   const handleSelectItem = (item: Item, offer?: SwapOffer) => {
-    setSelectedItem(item);
-    setActiveSwapOffer(offer ?? null);
+    setTabDetails((prev) => ({ ...prev, [currentTab]: { item, offer: offer ?? null } }));
   };
 
+  // Закрытие карточки: сбрасываем её только у текущего раздела, не трогая
+  // карточки, открытые в других разделах.
   const closeItemDetail = () => {
-    setSelectedItem(null);
-    setActiveSwapOffer(null);
+    setTabDetails((prev) => ({ ...prev, [currentTab]: { item: null, offer: null } }));
   };
 
   // Принять входящий своп прямо из карточки предмета: после ответа возвращаем
@@ -131,11 +152,9 @@ export function App() {
 
       <Navigation
         currentTab={currentTab}
-        onTabChange={(tab) => {
-          setCurrentTab(tab);
-          setSelectedItem(null);
-          setActiveSwapOffer(null);
-        }}
+        // Просто переключаем раздел. Открытая в нём карточка сохраняется и
+        // снова покажется, когда пользователь вернётся в этот раздел.
+        onTabChange={(tab) => setCurrentTab(tab)}
       />
     </div>
   );

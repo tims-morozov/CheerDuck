@@ -4,6 +4,7 @@ import { api } from '../api/client';
 import { useTelegram } from '../hooks/useTelegram';
 import { ArrowRightLeft } from 'lucide-react';
 import { SwapCard } from '../components/SwapCard';
+import { offerSortRank } from '../utils/swap';
 
 interface SwapsPageProps {
   // Клик по карточке предмета в свопе — открыть лот (как в ленте).
@@ -43,6 +44,12 @@ export const SwapsPage: React.FC<SwapsPageProps> = ({ onSelectItem }) => {
       alert(e.message || 'Ошибка обработки');
     }
   };
+
+  // Порядок карточек: активные (ожидают ответа, предметы живы) — сверху;
+  // завершённые (принятые/отклонённые) — ниже; «выбывшие» (приглушённая карточка
+  // «Предмет больше не активен») — в самом низу. Внутри каждой группы сохраняем
+  // порядок бэкенда (свежие сверху): сортировка в JS стабильная.
+  const sortedOffers = [...offers].sort((a, b) => offerSortRank(a) - offerSortRank(b));
 
   return (
     <div className="pb-28 pt-3 px-4 max-w-md mx-auto w-full text-left bg-black text-white">
@@ -87,7 +94,7 @@ export const SwapsPage: React.FC<SwapsPageProps> = ({ onSelectItem }) => {
         </div>
       ) : (
         <div className="space-y-3">
-          {offers.map((offer) => (
+          {sortedOffers.map((offer) => (
             <SwapCard
               key={offer.id}
               offer={offer}

@@ -2,6 +2,7 @@ import React from 'react';
 import type { Item, SwapOffer } from '../types';
 import { ArrowLeftRight } from 'lucide-react';
 import { ItemCard } from './ItemCard';
+import { isActiveOffer, isStaleOffer } from '../utils/swap';
 
 interface SwapCardProps {
   offer: SwapOffer;
@@ -29,14 +30,16 @@ export const SwapCard: React.FC<SwapCardProps> = ({ offer, isIncoming, onRespond
   const offeredItem = offer.offered_item ?? null;
   const targetItem = offer.target_item ?? null;
 
-  // Предмет «выбыл» из обмена, если его статус больше не 'active' (лот ушёл в архив
-  // после сделки, отправлен на модерацию или отклонён). Такой ожидающий оффер
-  // завершить нельзя, поэтому вместо удаления записи показываем приглушённую карточку
-  // с подписью — пользователь видит, что стало с предложением, а не «пропавшую» строку.
-  const isItemInactive =
-    (offeredItem !== null && offeredItem.status !== 'active') ||
-    (targetItem !== null && targetItem.status !== 'active');
-  const isStale = isPending && isItemInactive;
+  // Такой ожидающий оффер завершить нельзя, поэтому вместо удаления записи
+  // показываем приглушённую карточку с подписью — пользователь видит, что стало
+  // с предложением, а не «пропавшую» строку. Логика «выбывания» вынесена в
+  // utils/swap.ts, чтобы список в SwapsPage считал активность так же.
+  const isStale = isStaleOffer(offer);
+
+  // Открывать предметы разрешаем только в активных (ожидающих ответа, предметы живы)
+  // и в принятых предложениях (нужно сверить обмен). В неактивных — отклонённых и
+  // «выбывших» (серая карточка) — клик по предмету отключён.
+  const canOpenItems = isActiveOffer(offer) || isAccepted;
 
   return (
     <div
@@ -64,7 +67,7 @@ export const SwapCard: React.FC<SwapCardProps> = ({ offer, isIncoming, onRespond
             {offeredItem ? (
               <ItemCard
                 item={offeredItem}
-                onClick={onSelectItem ? () => onSelectItem(offeredItem, offer) : undefined}
+                onClick={onSelectItem && canOpenItems ? () => onSelectItem(offeredItem, offer) : undefined}
               />
             ) : (
               <SwapItemPlaceholder />
@@ -75,7 +78,7 @@ export const SwapCard: React.FC<SwapCardProps> = ({ offer, isIncoming, onRespond
             {targetItem ? (
               <ItemCard
                 item={targetItem}
-                onClick={onSelectItem ? () => onSelectItem(targetItem, offer) : undefined}
+                onClick={onSelectItem && canOpenItems ? () => onSelectItem(targetItem, offer) : undefined}
               />
             ) : (
               <SwapItemPlaceholder />

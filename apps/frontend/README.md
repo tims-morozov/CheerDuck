@@ -26,6 +26,7 @@
 - `components/` — переиспользуемые UI-компоненты
 - `hooks/` — `useTelegram` (Telegram WebApp SDK, Haptic Feedback)
 - `api/` — клиент REST API
+- `utils/` — доменные хелперы без UI (`swap.ts`: «активность» оффера — `isActiveOffer`/`isStaleOffer` и ранг сортировки списка `offerSortRank`; `cities.ts`: справочник городов РФ, метка «Все города» и живой поиск `filterCities`)
 - `index.css` — дизайн-токены (`@theme`) и базовая типографика
 
 ## Загрузка фотографий

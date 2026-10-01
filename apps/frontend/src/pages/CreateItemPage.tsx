@@ -2,10 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { api } from '../api/client';
 import { useTelegram } from '../hooks/useTelegram';
 import { Item } from '../types';
+import { CityPickerModal } from '../components/CityPickerModal';
 import { Camera, ChevronDown, X, ArrowLeft } from 'lucide-react';
 
 const CONDITIONS = ['Новое', 'Отличное', 'Хорошее', 'С нюансами'];
-const CITIES = ['Москва', 'Санкт-Петербург', 'Казань', 'Екатеринбург', 'Новосибирск'];
 // Максимум фото на один предмет (минимум — 1, проверяется при публикации)
 const MAX_PHOTOS = 5;
 
@@ -41,6 +41,8 @@ export const CreateItemPage: React.FC<CreateItemPageProps> = ({
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  // Открыт ли пикер города (модалка с поиском)
+  const [showCityPicker, setShowCityPicker] = useState(false);
 
   // Актуальный список фото — нужен, чтобы освободить blob-превью при размонтировании страницы
   const photosRef = useRef<PhotoItem[]>([]);
@@ -269,20 +271,16 @@ export const CreateItemPage: React.FC<CreateItemPageProps> = ({
           <label className="block text-xs font-semibold mb-1 text-[#8E8E93]">
             Город обмена
           </label>
-          {/* Те же правки, что и у селекта «Состояние»: своя стрелка с отступом от правого края */}
-          <div className="relative">
-            <select
-              required
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              className="w-full appearance-none bg-[#141414] border border-[#262626] text-white text-xs font-medium py-2.5 pl-3 pr-9 rounded-md focus:outline-none focus:border-[#CFFF76]"
-            >
-              {CITIES.map((c) => (
-                <option key={c} value={c} className="bg-black text-white">{c}</option>
-              ))}
-            </select>
-            <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-white pointer-events-none" />
-          </div>
+          {/* Город выбирается через пикер с поиском (CityPickerModal): кнопка в габаритах
+              остальных полей формы, стрелка — справа, как у селекта «Состояние» */}
+          <button
+            type="button"
+            onClick={() => setShowCityPicker(true)}
+            className="w-full flex items-center justify-between bg-[#141414] border border-[#262626] text-white text-xs font-medium py-2.5 pl-3 pr-3 rounded-md focus:outline-none focus:border-[#CFFF76]"
+          >
+            <span className="truncate">{city}</span>
+            <ChevronDown className="w-4 h-4 text-white shrink-0" />
+          </button>
         </div>
 
         <div>
@@ -309,6 +307,18 @@ export const CreateItemPage: React.FC<CreateItemPageProps> = ({
             : (isEditing ? 'Сохранить изменения' : 'Опубликовать для свопа')}
         </button>
       </form>
+
+      {/* Пикер города с поиском: в форме лота пункта «Все города» нет (город обязателен) */}
+      {showCityPicker && (
+        <CityPickerModal
+          selectedCity={city}
+          onSelect={(selected) => {
+            setCity(selected);
+            setShowCityPicker(false);
+          }}
+          onClose={() => setShowCityPicker(false)}
+        />
+      )}
     </div>
   );
 };

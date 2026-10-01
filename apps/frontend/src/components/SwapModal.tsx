@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Item } from '../types';
 import { api } from '../api/client';
 import { useTelegram } from '../hooks/useTelegram';
-import { X, ArrowRightLeft } from 'lucide-react';
+import { X, ArrowRightLeft, MapPin, Check } from 'lucide-react';
 
 interface SwapModalProps {
   targetItem: Item;
@@ -17,6 +17,10 @@ export const SwapModal: React.FC<SwapModalProps> = ({ targetItem, onClose, onSuc
   const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+
+  // Фото целевого лота — показываем миниатюру в блоке «Вы хотите получить»:
+  // по названию лоты могут совпадать (см. список выбора ниже), фото нагляднее.
+  const targetPhoto = targetItem.images && targetItem.images.length > 0 ? targetItem.images[0] : null;
 
   useEffect(() => {
     api.getMyItems()
@@ -57,17 +61,31 @@ export const SwapModal: React.FC<SwapModalProps> = ({ targetItem, onClose, onSuc
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div className="bg-[#141414] w-full max-w-md rounded-t-xl sm:rounded-lg p-5 text-left border border-[#262626] shadow-2xl max-h-[90vh] overflow-y-auto text-white">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="flex items-center gap-2 text-white">
-            <ArrowRightLeft className="w-5 h-5 text-[#CFFF76]" /> Предложить своп
-          </h2>
+          {/* Размер заголовка — как у логотип-надписи CheerDuck (text-xl = 20px) */}
+          <h2 className="text-xl text-white">Предложить своп</h2>
           <button onClick={onClose} className="p-1 rounded-full text-[#8E8E93] hover:text-white">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="mb-4 p-3 bg-[#1A1A1A] border border-[#262626] rounded-md text-xs">
-          <span className="text-[#8E8E93] block mb-0.5">Вы хотите получить:</span>
-          <span className="font-medium text-white line-clamp-1">{targetItem.title}</span>
+        <div className="mb-4 p-3 bg-[#1A1A1A] border border-[#262626] rounded-md flex items-center gap-3">
+          {/* Миниатюра целевого лота — чтобы точно сверить, обмен на что предлагаем */}
+          <div className="w-12 h-12 shrink-0 rounded-md overflow-hidden bg-[#0d0d0d] border border-[#262626] flex items-center justify-center">
+            {targetPhoto ? (
+              <img
+                src={targetPhoto}
+                alt={targetItem.title}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+            ) : (
+              <ArrowRightLeft className="w-5 h-5 opacity-40 text-[#CFFF76]" />
+            )}
+          </div>
+          <div className="min-w-0">
+            <span className="text-[#8E8E93] block mb-0.5 text-xs">Вы хотите получить:</span>
+            <span className="font-medium text-white text-xs line-clamp-2">{targetItem.title}</span>
+          </div>
         </div>
 
         <div className="mb-4">
@@ -81,24 +99,68 @@ export const SwapModal: React.FC<SwapModalProps> = ({ targetItem, onClose, onSuc
               У вас пока нет активных предметов для обмена. Сначала добавьте свой лот во вкладке «Добавить».
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1">
+            // Список строится строками (а не сеткой из одних заголовков): у каждого
+            // лота показываем миниатюру, город и состояние, поэтому даже лоты с
+            // одинаковым названием легко отличить. Выбранный вариант подсвечен и
+            // помечен галочкой.
+            <div className="flex flex-col gap-2 max-h-56 overflow-y-auto pr-0.5">
               {myItems.map((item) => {
                 const isSelected = selectedItemId === item.id;
+                const photo = item.images && item.images.length > 0 ? item.images[0] : null;
                 return (
-                  <div
+                  <button
                     key={item.id}
+                    type="button"
                     onClick={() => {
                       haptic.selection();
                       setSelectedItemId(item.id);
                     }}
-                    className={`p-2.5 rounded-md border text-xs cursor-pointer transition-all ${
+                    className={`w-full flex items-center gap-3 p-2.5 rounded-md border text-left transition-all ${
                       isSelected
-                        ? 'border-[#CFFF76] bg-[#CFFF76]/10 text-white font-bold'
-                        : 'border-[#262626] bg-[#1A1A1A] text-[#8E8E93] hover:border-zinc-500'
+                        ? 'border-[#CFFF76] bg-[#CFFF76]/10'
+                        : 'border-[#262626] bg-[#1A1A1A] hover:border-zinc-500'
                     }`}
                   >
-                    <p className="text-xs line-clamp-2">{item.title}</p>
-                  </div>
+                    {/* Миниатюра лота (или заглушка, если фото нет) */}
+                    <div className="w-12 h-12 shrink-0 rounded-md overflow-hidden bg-[#0d0d0d] border border-[#262626] flex items-center justify-center">
+                      {photo ? (
+                        <img
+                          src={photo}
+                          alt={item.title}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <ArrowRightLeft className="w-5 h-5 opacity-40 text-[#CFFF76]" />
+                      )}
+                    </div>
+
+                    {/* Название, город и состояние — чтобы различать одинаковые заголовки */}
+                    <div className="min-w-0 flex-grow">
+                      <p
+                        className={`text-xs line-clamp-2 ${
+                          isSelected ? 'text-white font-bold' : 'text-zinc-300'
+                        }`}
+                      >
+                        {item.title}
+                      </p>
+                      <div className="flex items-center text-[11px] text-[#8E8E93] mt-0.5 gap-1">
+                        <MapPin className="w-3 h-3 shrink-0" />
+                        <span className="truncate">{item.city}</span>
+                        <span className="text-[#3f3f46]">·</span>
+                        <span className="truncate">{item.condition}</span>
+                      </div>
+                    </div>
+
+                    {/* Индикатор выбора */}
+                    <div
+                      className={`w-5 h-5 shrink-0 rounded-full border flex items-center justify-center transition-colors ${
+                        isSelected ? 'bg-[#CFFF76] border-[#CFFF76]' : 'border-[#3f3f46]'
+                      }`}
+                    >
+                      {isSelected && <Check className="w-3 h-3 text-black" strokeWidth={3} />}
+                    </div>
+                  </button>
                 );
               })}
             </div>

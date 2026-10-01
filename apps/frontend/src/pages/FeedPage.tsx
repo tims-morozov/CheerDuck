@@ -3,9 +3,8 @@ import { Item } from '../types';
 import { api } from '../api/client';
 import { ItemCard } from '../components/ItemCard';
 import { CheerDuckLogo } from '../components/CheerDuckLogo';
-import { MapPin, Search, Sparkles } from 'lucide-react';
-
-const CITIES = ['Все города', 'Москва', 'Санкт-Петербург', 'Казань', 'Екатеринбург', 'Новосибирск'];
+import { CityPickerModal } from '../components/CityPickerModal';
+import { MapPin, Search } from 'lucide-react';
 
 interface FeedPageProps {
   onSelectItem: (item: Item) => void;
@@ -23,6 +22,8 @@ export const FeedPage: React.FC<FeedPageProps> = ({
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [search, setSearch] = useState<string>('');
+  // Открыт ли пикер города (модалка с поиском)
+  const [showCityPicker, setShowCityPicker] = useState<boolean>(false);
 
   const loadFeed = async () => {
     setLoading(true);
@@ -60,30 +61,16 @@ export const FeedPage: React.FC<FeedPageProps> = ({
           </span>
         </div>
 
-        {/* Выбор города: иконка слева, надпись рядом с ней, ширина кнопки — по выбранному городу.
-            Невидимый sizer с тем же текстом и теми же размерами задаёт ширину (нативный <select>
-            с appearance-none всегда растягивается по самому длинному пункту), а сам <select>
-            растянут поверх него через absolute inset-0 */}
-        <div className="relative">
-          <span
-            aria-hidden="true"
-            className="invisible block whitespace-nowrap text-xs font-medium py-1.5 pl-7 pr-2 border border-transparent"
-          >
-            {selectedCity}
-          </span>
-          <select
-            value={selectedCity}
-            onChange={(e) => onCityChange(e.target.value)}
-            className="absolute inset-0 w-full h-full appearance-none whitespace-nowrap bg-[#141414] text-white text-xs font-medium py-1.5 pl-7 pr-2 rounded-full border border-[#262626] focus:outline-none focus:border-[#CFFF76]"
-          >
-            {CITIES.map((c) => (
-              <option key={c} value={c} className="bg-black text-white">
-                {c}
-              </option>
-            ))}
-          </select>
-          <MapPin className="w-3.5 h-3.5 absolute left-2 top-2 text-[#8E8E93] pointer-events-none" />
-        </div>
+        {/* Выбор города: кнопка открывает пикер с поиском (CityPickerModal), где можно
+            найти любой город России, не листая длинный список вручную */}
+        <button
+          type="button"
+          onClick={() => setShowCityPicker(true)}
+          className="relative flex items-center pl-7 pr-3 py-1.5 bg-[#141414] text-white text-xs font-medium rounded-full border border-[#262626] focus:outline-none focus:border-[#CFFF76] active:scale-[0.98] transition-transform"
+        >
+          <MapPin className="w-3.5 h-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-[#8E8E93] pointer-events-none" />
+          <span className="whitespace-nowrap max-w-[130px] truncate">{selectedCity}</span>
+        </button>
       </div>
 
       {/* Поиск */}
@@ -119,6 +106,19 @@ export const FeedPage: React.FC<FeedPageProps> = ({
             <ItemCard key={item.id} item={item} onClick={() => onSelectItem(item)} />
           ))}
         </div>
+      )}
+
+      {/* Пикер города с поиском: в ленте доступен пункт «Все города» */}
+      {showCityPicker && (
+        <CityPickerModal
+          selectedCity={selectedCity}
+          includeAllCities
+          onSelect={(city) => {
+            onCityChange(city);
+            setShowCityPicker(false);
+          }}
+          onClose={() => setShowCityPicker(false)}
+        />
       )}
     </div>
   );
